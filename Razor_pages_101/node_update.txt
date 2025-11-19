@@ -1,0 +1,4 @@
+go to visual studio -> make page razor and create nameproject
+
+use github and init project
+
