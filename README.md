@@ -1,0 +1,2 @@
+# basic_dotnet_core_Razor_Pages
+just basic_dotnet_core_Razor_Pages
