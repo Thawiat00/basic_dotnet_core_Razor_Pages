@@ -948,3 +948,154 @@ UI สวยขึ้น (Release Date แทน ReleaseDate)
 URL สวยขึ้น (/Edit/1 แทน /Edit?id=1)
 จัดการ concurrency ได้
 ควบคุมการแสดงผลข้อมูลได้ดีขึ้น
+
+
+
+-----------------
+
+part 6 search on asp.net
+
+Part 6: เพิ่มการค้นหาใน ASP.NET Core Razor Pages
+ให้ผอมอธิบาย Part 6 นี้ให้ฟังนะครับ มันเป็นการเพิ่มฟีเจอร์ ค้นหาหนัง โดยสามารถค้นหาจาก ชื่อหนัง และ ประเภทหนัง (Genre) ได้
+
+🎯 สิ่งที่จะได้เรียนรู้
+
+การค้นหาด้วยชื่อหนัง (Title Search)
+การกรองด้วยประเภทหนัง (Genre Filter)
+การใช้ [BindProperty] กับ HTTP GET
+การทำงานของ LINQ Query
+
+
+📝 อธิบาย Code แต่ละส่วน
+1. เพิ่ม Properties ใน IndexModel
+csharppublic class IndexModel : PageModel
+{
+    private readonly RazorPagesMovieContext _context;
+
+    public IList<Movie> Movie { get;set; } = default!;
+
+    [BindProperty(SupportsGet = true)]
+    public string? SearchString { get; set; }
+
+    public SelectList? Genres { get; set; }
+
+    [BindProperty(SupportsGet = true)]
+    public string? MovieGenre { get; set; }
+}
+อธิบาย:
+
+SearchString: เก็บคำที่ผู้ใช้พิมพ์ในช่องค้นหา
+[BindProperty(SupportsGet = true)]: ทำให้สามารถรับค่าจาก Query String ได้ (เช่น ?searchString=Ghost)
+Genres: รายการประเภทหนังทั้งหมด (สำหรับ dropdown)
+MovieGenre: ประเภทหนังที่ผู้ใช้เลือก
+
+
+2. อัพเดท OnGetAsync Method (ค้นหาด้วยชื่อ)
+csharppublic async Task OnGetAsync()
+{
+    // สร้าง LINQ Query
+    var movies = from m in _context.Movie
+                 select m;
+    
+    // ถ้ามีการพิมพ์คำค้นหา
+    if (!string.IsNullOrEmpty(SearchString))
+    {
+        movies = movies.Where(s => s.Title.Contains(SearchString));
+    }
+
+    Movie = await movies.ToListAsync();
+}
+อธิบาย:
+
+from m in _context.Movie select m: สร้าง query เพื่อดึงหนังทั้งหมด (ยังไม่ทำงานจริง)
+Contains(SearchString): กรองหนังที่มีชื่อตรงกับคำค้นหา
+ToListAsync(): เมื่อเรียก method นี้ query จะถูกส่งไปยัง database จริงๆ
+
+💡 สำคัญ:
+
+LINQ Query จะไม่ทำงานจนกว่าจะเรียก ToListAsync() (เรียกว่า Deferred Execution)
+Contains() ทำงานบน database ไม่ใช่ใน C# code
+
+
+3. เพิ่ม UI สำหรับค้นหา
+html<form>
+    <p>
+        <label>Title: <input type="text" asp-for="SearchString" /></label>
+        <input type="submit" value="Filter" />
+    </p>
+</form>
+อธิบาย:
+
+asp-for="SearchString": ผูก input กับ property SearchString
+เมื่อกดปุ่ม Filter จะส่งค่าไปเป็น Query String (?searchString=Ghost)
+
+
+4. เพิ่มการค้นหาด้วย Genre
+csharppublic async Task OnGetAsync()
+{
+    // ดึงรายการ Genre ทั้งหมด (ไม่ซ้ำกัน)
+    IQueryable<string> genreQuery = from m in _context.Movie
+                                    orderby m.Genre
+                                    select m.Genre;
+
+    var movies = from m in _context.Movie
+                 select m;
+
+    // กรองด้วยชื่อ
+    if (!string.IsNullOrEmpty(SearchString))
+    {
+        movies = movies.Where(s => s.Title.Contains(SearchString));
+    }
+
+    // กรองด้วย Genre
+    if (!string.IsNullOrEmpty(MovieGenre))
+    {
+        movies = movies.Where(x => x.Genre == MovieGenre);
+    }
+
+    // สร้าง SelectList สำหรับ dropdown
+    Genres = new SelectList(await genreQuery.Distinct().ToListAsync());
+    Movie = await movies.ToListAsync();
+}
+อธิบาย:
+
+genreQuery: ดึง Genre ทั้งหมดมาเรียงตามตัวอักษร
+Distinct(): ลบ Genre ที่ซ้ำกันออก
+SelectList: สร้างรายการสำหรับ dropdown
+สามารถกรองทั้งชื่อและ Genre พร้อมกันได้
+
+
+5. เพิ่ม Dropdown สำหรับ Genre
+html<form>
+    <p>
+        <select asp-for="MovieGenre" asp-items="Model.Genres">
+            <option value="">All</option>
+        </select>
+        <label>Title: <input type="text" asp-for="SearchString" /></label>
+        <input type="submit" value="Filter" />
+    </p>
+</form>
+อธิบาย:
+
+asp-for="MovieGenre": ผูก dropdown กับ property MovieGenre
+asp-items="Model.Genres": ใช้ข้อมูลจาก Genres property
+<option value="">All</option>: ตัวเลือกแสดงหนังทั้งหมด
+
+
+🔍 ตัวอย่างการใช้งาน
+
+ค้นหาด้วยชื่อ: /Movies?searchString=Ghost
+กรองด้วย Genre: /Movies?movieGenre=Action
+ค้นหาทั้งสอง: /Movies?searchString=Ghost&movieGenre=Comedy
+
+
+⚠️ ข้อควรระวัง
+
+ต้องใส่ SupportsGet = true เพื่อให้รับค่าจาก Query String ได้
+Contains() บน SQL Server ไม่สนใจตัวพิมพ์เล็ก-ใหญ่
+LINQ Query ไม่ทำงานทันที จนกว่าจะเรียก ToListAsync()
+
+
+========================
+
+
