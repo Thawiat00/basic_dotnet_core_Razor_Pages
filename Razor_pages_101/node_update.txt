@@ -816,3 +816,135 @@ SqlException: Cannot open database "RazorPagesMovieContext-" requested by the lo
 
 สรุป Part 4
 หัวข้อสิ่งที่เรียนรู้Database Contextลงทะเบียนใน DI containerConnection Stringเก็บใน appsettings.jsonLocalDBฐานข้อมูล SQL Server แบบเบาสำหรับพัฒนาSeedDataใส่ข้อมูลเริ่มต้นอัตโนมัติScopeจัดการ lifetime ของ services
+
+
+
+---------------------
+
+
+สรุป Razor Pages Part 5: อัพเดทหน้า Generated Pages
+Part 5 นี้สอนเรื่องการปรับปรุงหน้าเว็บที่ถูก scaffold มาอัตโนมัติให้ดูดีขึ้นและทำงานได้ดีขึ้น
+สิ่งที่จะเรียนรู้ในตอนนี้:
+1. ใช้ Data Annotations ตกแต่ง Model
+csharppublic class Movie
+{
+    public int Id { get; set; }
+    public string Title { get; set; } = string.Empty;
+
+    [Display(Name = "Release Date")]  // แสดงชื่อว่า "Release Date" แทน "ReleaseDate"
+    [DataType(DataType.Date)]          // บอกว่าเป็นข้อมูลประเภทวันที่ (ไม่แสดงเวลา)
+    public DateTime ReleaseDate { get; set; }
+    
+    public string Genre { get; set; } = string.Empty;
+
+    [Column(TypeName = "decimal(18, 2)")]  // กำหนดให้เก็บทศนิยม 2 ตำแหน่งในฐานข้อมูล
+    public decimal Price { get; set; }
+}
+อธิบาย:
+
+[Display(Name = "Release Date")] - เปลี่ยนชื่อที่แสดงบนหน้าเว็บ
+[DataType(DataType.Date)] - บอกว่าเป็นวันที่ ไม่ต้องแสดงเวลา
+[Column(TypeName = "decimal(18, 2)")] - เก็บราคาเป็นทศนิยม 18 หลัก, 2 ตำแหน่งหลังจุด
+
+
+2. Anchor Tag Helper สร้างลิงก์
+cshtml<a asp-page="./Edit" asp-route-id="@item.Id">Edit</a> |
+<a asp-page="./Details" asp-route-id="@item.Id">Details</a> |
+<a asp-page="./Delete" asp-route-id="@item.Id">Delete</a>
+อธิบาย:
+
+asp-page="./Edit" - ชี้ไปหน้า Edit
+asp-route-id="@item.Id" - ส่ง ID ของหนังไปด้วย
+
+HTML ที่ได้ (แบบเดิม):
+html<a href="/Movies/Edit?id=1">Edit</a>
+ID อยู่ใน query string (?id=1)
+
+3. Route Template - ทำ URL สวยขึ้น
+เปลี่ยน page directive จาก:
+cshtml@page
+เป็น:
+cshtml@page "{id:int}"
+HTML ที่ได้ (แบบใหม่):
+html<a href="/Movies/Edit/1">Edit</a>
+ID อยู่ใน path (/Movies/Edit/1) สวยกว่า!
+ถ้าต้องการให้ ID เป็น optional:
+cshtml@page "{id:int?}"
+เพิ่ม ? ข้างหลัง - เข้า /Movies/Details/ ได้โดยไม่ต้องมี ID
+
+4. Model Binding และ OnPostAsync
+csharp[BindProperty]  // ผูกข้อมูลจากฟอร์มเข้ากับ property นี้อัตโนมัติ
+public Movie Movie { get; set; } = default!;
+
+public async Task<IActionResult> OnPostAsync()
+{
+    if (!ModelState.IsValid)  // ตรวจสอบข้อมูลถูกต้องไหม
+    {
+        return Page();  // ไม่ถูกต้อง - แสดงฟอร์มใหม่
+    }
+
+    _context.Attach(Movie).State = EntityState.Modified;  // บอก EF ว่าข้อมูลถูกแก้ไข
+
+    try
+    {
+        await _context.SaveChangesAsync();  // บันทึกลงฐานข้อมูล
+    }
+    catch (DbUpdateConcurrencyException)  // มีคนอื่นแก้ไขพร้อมกัน
+    {
+        if (!MovieExists(Movie.Id))
+        {
+            return NotFound();
+        }
+        else
+        {
+            throw;
+        }
+    }
+
+    return RedirectToPage("./Index");  // สำเร็จ - กลับไปหน้า Index
+}
+
+5. Concurrency Exception - จัดการการแก้ไขพร้อมกัน
+สถานการณ์:
+
+User A เปิดหน้า Edit หนัง ID=1
+User B ลบหนัง ID=1 ทิ้ง
+User A กด Save
+
+การจัดการ:
+csharpcatch (DbUpdateConcurrencyException)
+{
+    if (!MovieExists(Movie.Id))  // ถ้าข้อมูลถูกลบไปแล้ว
+    {
+        return NotFound();  // แสดง error 404
+    }
+    else
+    {
+        throw;  // มีปัญหาอื่น - throw ต่อไป
+    }
+}
+
+สรุป Flow การทำงาน:
+GET Request (แสดงฟอร์ม):
+
+User เข้า /Movies/Edit/3
+OnGetAsync(3) ถูกเรียก
+ดึงข้อมูลหนัง ID=3 จาก database
+แสดงฟอร์มพร้อมข้อมูลเดิม
+
+POST Request (บันทึกข้อมูล):
+
+User กด Save
+OnPostAsync() ถูกเรียก
+[BindProperty] ผูกข้อมูลจากฟอร์มเข้า Movie property
+ตรวจสอบความถูกต้อง (ModelState)
+บันทึกลง database
+Redirect กลับไปหน้า Index
+
+
+ข้อดีของ Part 5:
+
+UI สวยขึ้น (Release Date แทน ReleaseDate)
+URL สวยขึ้น (/Edit/1 แทน /Edit?id=1)
+จัดการ concurrency ได้
+ควบคุมการแสดงผลข้อมูลได้ดีขึ้น

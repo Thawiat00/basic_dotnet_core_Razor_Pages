@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Razor_pages_101.Models
 {
@@ -6,12 +7,15 @@ namespace Razor_pages_101.Models
     {
         public int Id { get; set; }
         public string? Title { get; set; }
-        
+
+        [Display(Name = "Release Date")]
         [DataType(DataType.Date)]
         public DateTime ReleaseDate { get; set; }
         
         public string? Genre { get; set; }
 
+
+        [Column(TypeName = "decimal(18, 2)")]
         public decimal Price { get; set; }
 
 
