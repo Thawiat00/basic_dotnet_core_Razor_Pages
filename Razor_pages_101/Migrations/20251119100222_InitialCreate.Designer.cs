@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Razor_pages_101.Migrations
 {
     [DbContext(typeof(Test_db))]
-    [Migration("20251119090737_InitialCreate")]
+    [Migration("20251119100222_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />

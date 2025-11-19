@@ -1,5 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Razor_pages_101.Models;
+
+
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -8,11 +11,24 @@ var builder = WebApplication.CreateBuilder(args);
 //add services to the container
 builder.Services.AddRazorPages();
 builder.Services.AddDbContext<Test_db>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("Test_db") ?? throw new InvalidOperationException("Connection string 'Test_db' not found.")));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'Test_db' not found.")));
 
 
 
 var app = builder.Build();
+
+
+
+
+
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+
+    SeedData.Initialize(services);
+}
+
+
 
 // Configure the HTTP request pipeline.
 // cofig the http

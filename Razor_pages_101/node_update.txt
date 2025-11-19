@@ -701,3 +701,118 @@ cshtml<!DOCTYPE html>
 -----------------
 
 
+สอน Razor Pages Part 4 - การทำงานกับฐานข้อมูล
+Part 4 นี้เกี่ยวกับอะไร?
+Part 4 จะสอนเรื่อง การเชื่อมต่อกับฐานข้อมูลและการใส่ข้อมูลเริ่มต้น (Seeding) ให้กับแอปพลิเคชัน Movie ของเรา
+
+1. Database Context และ Dependency Injection
+อธิบาย Code ใน Program.cs:
+csharpbuilder.Services.AddDbContext<RazorPagesMovieContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("RazorPagesMovieContext") 
+    ?? throw new InvalidOperationException("Connection string not found.")));
+คือ:
+
+AddDbContext = ลงทะเบียน Database Context เพื่อให้ทุก page ใช้ได้
+UseSqlServer = บอกว่าจะใช้ SQL Server เป็นฐานข้อมูล
+GetConnectionString = ดึงค่า connection string จากไฟล์ appsettings.json
+?? = ถ้าไม่เจอ connection string ให้ throw error
+
+
+2. Connection String ใน appsettings.json
+json{
+  "ConnectionStrings": {
+    "RazorPagesMovieContext": "Server=(localdb)\\mssqllocaldb;Database=RazorPagesMovieContext-xxx;Trusted_Connection=True"
+  }
+}
+คือ:
+
+เก็บข้อมูลการเชื่อมต่อฐานข้อมูล
+(localdb)\\mssqllocaldb = ใช้ SQL Server LocalDB (สำหรับพัฒนาบนเครื่องตัวเอง)
+Trusted_Connection=True = ใช้ Windows Authentication
+
+
+3. SeedData Class - ใส่ข้อมูลเริ่มต้น
+อธิบาย Code:
+csharppublic static class SeedData
+{
+    public static void Initialize(IServiceProvider serviceProvider)
+    {
+        using (var context = new RazorPagesMovieContext(
+            serviceProvider.GetRequiredService<DbContextOptions<RazorPagesMovieContext>>()))
+        {
+            // เช็กว่า context หรือ Movie table เป็น null หรือไม่
+            if (context == null || context.Movie == null)
+            {
+                throw new ArgumentNullException("Null RazorPagesMovieContext");
+            }
+
+            // เช็กว่ามีหนังในฐานข้อมูลแล้วหรือยัง
+            if (context.Movie.Any())
+            {
+                return;   // ถ้ามีแล้ว ไม่ต้องเพิ่ม
+            }
+
+            // เพิ่มหนังตัวอย่าง 4 เรื่อง
+            context.Movie.AddRange(
+                new Movie
+                {
+                    Title = "When Harry Met Sally",
+                    ReleaseDate = DateTime.Parse("1989-2-12"),
+                    Genre = "Romantic Comedy",
+                    Price = 7.99M
+                },
+                new Movie
+                {
+                    Title = "Ghostbusters",
+                    ReleaseDate = DateTime.Parse("1984-3-13"),
+                    Genre = "Comedy",
+                    Price = 8.99M
+                },
+                // ... อีก 2 เรื่อง
+            );
+            
+            // บันทึกลงฐานข้อมูล
+            context.SaveChanges();
+        }
+    }
+}
+สิ่งที่ทำ:
+
+เช็กว่ามีข้อมูลแล้วหรือยัง - ถ้ามี ก็ไม่เพิ่ม
+เพิ่มหนัง 4 เรื่อง - When Harry Met Sally, Ghostbusters, Ghostbusters 2, Rio Bravo
+บันทึกลงฐานข้อมูล - ด้วย SaveChanges()
+
+
+4. เรียกใช้ SeedData ใน Program.cs
+csharpvar app = builder.Build();
+
+// สร้าง scope เพื่อใช้ DI
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    
+    // เรียก Initialize เพื่อใส่ข้อมูล
+    SeedData.Initialize(services);
+}
+```
+
+**ทำไมต้องใช้ Scope?**
+- Database Context มี lifetime แบบ Scoped
+- ต้องสร้าง scope ชั่วคราวเพื่อเรียกใช้ context ตอน startup
+
+---
+
+## 5. วิธีทดสอบ
+
+### ขั้นตอน:
+1. **ลบข้อมูลทั้งหมดในฐานข้อมูล** (ถ้ามี)
+2. **รันแอป** - seed method จะทำงานและใส่ข้อมูล 4 หนังเข้าไป
+3. **ตรวจสอบ** - ใช้ SQL Server Object Explorer (SSOX) ดูข้อมูลในตาราง Movie
+
+### ถ้าเจอ Error:
+```
+SqlException: Cannot open database "RazorPagesMovieContext-" requested by the login
+แก้ไข: รัน Update-Database ใน Package Manager Console ก่อน
+
+สรุป Part 4
+หัวข้อสิ่งที่เรียนรู้Database Contextลงทะเบียนใน DI containerConnection Stringเก็บใน appsettings.jsonLocalDBฐานข้อมูล SQL Server แบบเบาสำหรับพัฒนาSeedDataใส่ข้อมูลเริ่มต้นอัตโนมัติScopeจัดการ lifetime ของ services
