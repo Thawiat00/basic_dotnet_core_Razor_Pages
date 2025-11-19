@@ -2,3 +2,4 @@ go to visual studio -> make page razor and create nameproject
 
 use github and init project
 
+ref_gitignore : https://github.com/DamianEdwards/RazorPagesSample/blob/master/.gitignore
