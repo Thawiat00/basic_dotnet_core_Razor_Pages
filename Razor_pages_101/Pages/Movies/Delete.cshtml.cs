@@ -5,16 +5,15 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
-using Razor_pages_101.Data;
 using Razor_pages_101.Models;
 
-namespace Razor_pages_101.Pages.Movies
+namespace Razor_pages_101.Models.Movies
 {
     public class DeleteModel : PageModel
     {
-        private readonly Razor_pages_101.Data.Razor_pages_101Context _context;
+        private readonly Test_db _context;
 
-        public DeleteModel(Razor_pages_101.Data.Razor_pages_101Context context)
+        public DeleteModel(Test_db context)
         {
             _context = context;
         }

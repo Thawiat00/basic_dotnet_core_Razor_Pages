@@ -4,14 +4,13 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Razor_pages_101.Data;
 
 #nullable disable
 
 namespace Razor_pages_101.Migrations
 {
-    [DbContext(typeof(Razor_pages_101Context))]
-    partial class Razor_pages_101ContextModelSnapshot : ModelSnapshot
+    [DbContext(typeof(Test_db))]
+    partial class Test_dbModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
         {

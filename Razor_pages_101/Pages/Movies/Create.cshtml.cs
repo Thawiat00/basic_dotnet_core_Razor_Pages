@@ -5,16 +5,15 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Razor_pages_101.Data;
 using Razor_pages_101.Models;
 
-namespace Razor_pages_101.Pages.Movies
+namespace Razor_pages_101.Models.Movies
 {
     public class CreateModel : PageModel
     {
-        private readonly Razor_pages_101.Data.Razor_pages_101Context _context;
+        private readonly Test_db _context;
 
-        public CreateModel(Razor_pages_101.Data.Razor_pages_101Context context)
+        public CreateModel(Test_db context)
         {
             _context = context;
         }
@@ -28,7 +27,6 @@ namespace Razor_pages_101.Pages.Movies
         public Movie Movie { get; set; } = default!;
 
         // For more information, see https://aka.ms/RazorPagesCRUD.
-        // To protect from overposting attacks, see https://aka.ms/RazorPagesCRUD
         public async Task<IActionResult> OnPostAsync()
         {
             if (!ModelState.IsValid)

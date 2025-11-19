@@ -5,14 +5,13 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Razor_pages_101.Data;
 
 #nullable disable
 
 namespace Razor_pages_101.Migrations
 {
-    [DbContext(typeof(Razor_pages_101Context))]
-    [Migration("20251119053646_InitialCreate")]
+    [DbContext(typeof(Test_db))]
+    [Migration("20251119090737_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
