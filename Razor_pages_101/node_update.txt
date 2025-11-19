@@ -1,5 +1,703 @@
-go to visual studio -> make page razor and create nameproject
+﻿go to visual studio -> make page razor and create nameproject
 
 use github and init project
 
 ref_gitignore : https://github.com/DamianEdwards/RazorPagesSample/blob/master/.gitignore
+
+
+razor_part_1
+
+Razor Pages Part 1 - พื้นฐานสำหรับมือใหม่
+มาเรียนรู้เกี่ยวกับโครงสร้างโปรเจค Razor Pages กันครับ! 🚀
+Razor Pages คืออะไร?
+Razor Pages คือเทคโนโลยีสำหรับสร้างเว็บแอปพลิเคชันใน ASP.NET Core ที่เน้นการทำงานแบบ page-based (ทำงานเป็นหน้าๆ) ซึ่งเหมาะมากสำหรับการสร้างเว็บไซต์ที่มีหน้าเว็บหลายๆ หน้า เช่น เว็บบล็อก, เว็บอีคอมเมิร์ซ, ระบบจัดการข้อมูล
+
+โครงสร้างโปรเจค Razor Pages
+📁 Pages Folder
+โฟลเดอร์หลักที่เก็บหน้าเว็บทั้งหมด แต่ละหน้าประกอบด้วย 2 ไฟล์คู่กัน:
+
+.cshtml - ไฟล์ HTML ที่มี Razor Syntax (ผสม HTML + C#)
+.cshtml.cs - ไฟล์ C# ที่จัดการ logic และ event ของหน้านั้นๆ
+
+ไฟล์พิเศษที่ขึ้นต้นด้วย _ (underscore):
+
+_Layout.cshtml - กำหนด layout ร่วม เช่น เมนูบาร์, footer ที่ใช้ทุกหน้า
+
+📁 wwwroot Folder
+เก็บไฟล์ static ต่างๆ เช่น:
+
+ไฟล์ HTML
+JavaScript files (.js)
+CSS files (.css)
+รูปภาพ
+
+📄 appsettings.json
+ไฟล์ config เก็บค่าต่างๆ เช่น:
+
+Connection strings (สำหรับเชื่อมต่อฐานข้อมูล)
+การตั้งค่าแอปพลิเคชัน
+
+
+🔍 อธิบาย Code ใน Program.cs
+ไฟล์ Program.cs คือจุดเริ่มต้นของแอปพลิเคชัน มาดูทีละส่วนกันครับ:
+ส่วนที่ 1: สร้าง Builder และเพิ่ม Services
+csharpvar builder = WebApplication.CreateBuilder(args);
+
+// เพิ่ม Razor Pages เข้าไปใน Dependency Injection container
+builder.Services.AddRazorPages();
+
+var app = builder.Build();
+อธิบาย:
+
+WebApplication.CreateBuilder(args) - สร้างตัว builder พร้อมการตั้งค่าพื้นฐาน
+AddRazorPages() - บอกให้แอปรู้ว่าเราจะใช้ Razor Pages (จำเป็นต้องมี!)
+app.Build() - สร้างแอปพลิเคชันจากการตั้งค่าที่กำหนด
+
+
+ส่วนที่ 2: จัดการ Exception และ HSTS
+csharpif (!app.Environment.IsDevelopment())
+{
+    app.UseExceptionHandler("/Error");
+    app.UseHsts();
+}
+อธิบาย:
+
+เช็คว่าแอปกำลังรันใน production mode หรือไม่ (ไม่ใช่ development)
+UseExceptionHandler("/Error") - ถ้ามี error เกิดขึ้น จะพาไปที่หน้า /Error แทนที่จะแสดง error แบบละเอียด (เพื่อความปลอดภัย)
+UseHsts() - เปิดใช้ HSTS (HTTP Strict Transport Security) บังคับให้ใช้ HTTPS
+
+ทำไมต้องแยก? เพราะตอน development เราต้องการเห็น error แบบละเอียด แต่ตอน production ห้ามให้คนทั่วไปเห็นข้อมูลสำคัญ!
+
+ส่วนที่ 3: กำหนด Middleware Pipeline
+csharpapp.UseHttpsRedirection();
+app.UseStaticFiles();
+app.UseRouting();
+app.UseAuthorization();
+app.MapRazorPages();
+Middleware คือตัวประมวลผลที่ทำงานตามลำดับ เหมือนสายพานการผลิต:
+
+UseHttpsRedirection() - เปลี่ยน HTTP เป็น HTTPS อัตโนมัติ (ปลอดภัยขึ้น)
+UseStaticFiles() - เปิดให้เข้าถึงไฟล์ static ใน wwwroot (CSS, JS, รูปภาพ)
+UseRouting() - เปิดระบบ routing (จับคู่ URL กับหน้าเว็บ)
+UseAuthorization() - เช็คสิทธิ์การเข้าถึง (ถ้าไม่มีระบบ login อาจไม่ต้องใช้)
+MapRazorPages() - กำหนดให้ Razor Pages ทำงาน
+app.Run() - รันแอปพลิเคชัน
+
+
+💡 สรุป
+Razor Pages เหมาะกับอะไร?
+✅ เว็บไซต์ที่มีหน้าเว็บหลายหน้า
+✅ CRUD applications (สร้าง-อ่าน-แก้ไข-ลบข้อมูล)
+✅ เรียนรู้ง่าย เหมาะสำหรับมือใหม่
+โครงสร้างง่ายๆ:
+
+Pages/ → หน้าเว็บต่างๆ (.cshtml + .cshtml.cs)
+wwwroot/ → ไฟล์ static (CSS, JS, รูปภาพ)
+Program.cs → จุดเริ่มต้นของแอป
+appsettings.json → การตั้งค่า
+
+
+--------------------
+
+part2 :Part 2, add a model to a Razor Pages app in ASP.NET Core
+ref: https://learn.microsoft.com/en-us/aspnet/core/tutorials/razor-pages/model?view=aspnetcore-8.0&tabs=visual-studio
+
+Razor Pages Part 2 - การเพิ่ม Model และ Database
+ใน Part 2 นี้เราจะเรียนรู้เกี่ยวกับการสร้าง Model (โมเดลข้อมูล) และการใช้ Entity Framework Core เพื่อทำงานกับฐานข้อมูลครับ! 🎬
+
+Part 2 ทำอะไรบ้าง?
+
+สร้าง Model Class สำหรับจัดการข้อมูลหนัง (Movie)
+ใช้ Entity Framework Core (EF Core) เชื่อมต่อกับฐานข้อมูล
+Scaffold (สร้างหน้าเว็บอัตโนมัติ) สำหรับ CRUD operations
+สร้างฐานข้อมูลด้วย Migration
+
+
+🎯 Entity Framework Core (EF Core) คืออะไร?
+EF Core คือ Object-Relational Mapper (ORM) ที่ช่วยให้เราทำงานกับฐานข้อมูลได้ง่ายขึ้น
+แทนที่จะเขียน SQL แบบนี้:
+sqlINSERT INTO Movies (Title, Genre, Price) VALUES ('Avatar', 'Sci-Fi', 299.00)
+เราสามารถเขียน C# แบบนี้:
+csharpvar movie = new Movie { Title = "Avatar", Genre = "Sci-Fi", Price = 299.00M };
+context.Movies.Add(movie);
+context.SaveChanges();
+
+📦 ขั้นตอนที่ 1: สร้าง Model Class
+สร้างโฟลเดอร์และไฟล์
+
+สร้างโฟลเดอร์ Models
+สร้างไฟล์ Movie.cs ในโฟลเดอร์ Models
+
+Code ของ Movie Model
+csharpusing System.ComponentModel.DataAnnotations;
+
+namespace RazorPagesMovie.Models;
+
+public class Movie
+{
+    public int Id { get; set; }
+    public string? Title { get; set; }
+    
+    [DataType(DataType.Date)]
+    public DateTime ReleaseDate { get; set; }
+    
+    public string? Genre { get; set; }
+    public decimal Price { get; set; }
+}
+🔍 อธิบาย Code แต่ละส่วน
+Propertyความหมายpublic int Idรหัสหนัง (Primary Key) - ฐานข้อมูลต้องการสำหรับแยกแต่ละแถวpublic string? Titleชื่อหนัง - เครื่องหมาย ? = nullable (อนุญาตให้เป็น null ได้)[DataType(DataType.Date)]Data Annotation บอกว่าเก็บเฉพาะ วันที่ ไม่ต้องมีเวลาpublic DateTime ReleaseDateวันที่เข้าฉายpublic string? Genreประเภทหนัง (แอคชั่น, คอมเมดี้, ฯลฯ)public decimal Priceราคา (ใช้ decimal เพราะเป็นตัวเลขเงิน)
+POCO Class = Plain-Old CLR Objects หมายความว่า class ธรรมดาที่ไม่ขึ้นกับ EF Core โดยตรง
+
+🏗️ ขั้นตอนที่ 2: Scaffolding
+Scaffolding คือการสร้างหน้าเว็บอัตโนมัติสำหรับ CRUD Operations:
+
+Create - สร้างข้อมูลใหม่
+Read - อ่าน/แสดงข้อมูล
+Update - แก้ไขข้อมูล
+Delete - ลบข้อมูล
+
+สิ่งที่ Scaffold สร้างให้
+ไฟล์ที่ถูกสร้างใน Pages/Movies/:
+
+Create.cshtml และ Create.cshtml.cs - หน้าสร้างหนังใหม่
+Index.cshtml และ Index.cshtml.cs - หน้าแสดงรายการหนังทั้งหมด
+Details.cshtml และ Details.cshtml.cs - หน้าแสดงรายละเอียด
+Edit.cshtml และ Edit.cshtml.cs - หน้าแก้ไขข้อมูล
+Delete.cshtml และ Delete.cshtml.cs - หน้าลบข้อมูล
+
+ไฟล์ Database Context:
+
+Data/RazorPagesMovieContext.cs - ตัวจัดการฐานข้อมูล
+
+
+💾 ขั้นตอนที่ 3: Database Context
+Code ของ RazorPagesMovieContext
+csharpusing Microsoft.EntityFrameworkCore;
+using RazorPagesMovie.Models;
+
+namespace RazorPagesMovie.Data
+{
+    public class RazorPagesMovieContext : DbContext
+    {
+        public RazorPagesMovieContext(DbContextOptions<RazorPagesMovieContext> options)
+            : base(options)
+        {
+        }
+
+        public DbSet<RazorPagesMovie.Models.Movie> Movie { get; set; } = default!;
+    }
+}
+🔍 อธิบาย
+
+DbContext - คลาสหลักของ EF Core ที่จัดการการเชื่อมต่อฐานข้อมูล
+DbSet<Movie> - ตัวแทนของตาราง Movies ในฐานข้อมูล
+
+Entity Set = ตาราง
+Entity = แถวในตาราง
+
+
+Constructor - รับ options สำหรับการตั้งค่าการเชื่อมต่อ
+
+
+⚙️ ขั้นตอนที่ 4: ลงทะเบียน DbContext ใน Program.cs
+Code ที่เพิ่มเข้าไปใน Program.cs
+csharpusing Microsoft.EntityFrameworkCore;
+using RazorPagesMovie.Data;
+
+var builder = WebApplication.CreateBuilder(args);
+
+// เพิ่ม services
+builder.Services.AddRazorPages();
+
+// ลงทะเบียน DbContext พร้อม Connection String
+builder.Services.AddDbContext<RazorPagesMovieContext>(options =>
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("RazorPagesMovieContext") 
+        ?? throw new InvalidOperationException("Connection string 'RazorPagesMovieContext' not found.")
+    )
+);
+
+var app = builder.Build();
+// ... ส่วนที่เหลือ
+🔍 อธิบาย
+
+AddDbContext<RazorPagesMovieContext> - ลงทะเบียน DbContext ใน Dependency Injection
+UseSqlServer(...) - บอกว่าใช้ SQL Server
+GetConnectionString(...) - อ่าน connection string จาก appsettings.json
+?? (null-coalescing operator) - ถ้าไม่เจอ connection string ให้ throw error
+
+
+🗄️ ขั้นตอนที่ 5: Migration (สร้างฐานข้อมูล)
+Migration คือการสร้างและอัพเดทโครงสร้างฐานข้อมูล
+คำสั่งใน Package Manager Console (PMC)
+powershell# 1. สร้าง Migration
+Add-Migration InitialCreate
+
+# 2. สร้างฐานข้อมูล
+Update-Database
+สิ่งที่เกิดขึ้น
+
+Add-Migration InitialCreate
+
+สร้างไฟล์ Migration ใน Migrations/ folder
+ไฟล์นี้มีคำสั่ง SQL สำหรับสร้างตาราง
+
+
+Update-Database
+
+รันคำสั่ง SQL จาก Migration
+สร้างฐานข้อมูลและตาราง Movies จริงๆ
+
+
+
+
+🧩 Dependency Injection คืออะไร?
+Dependency Injection (DI) คือการที่ระบบช่วยส่ง object ที่ต้องการให้เราโดยอัตโนมัติ
+ตัวอย่าง
+csharppublic class IndexModel : PageModel
+{
+    private readonly RazorPagesMovieContext _context;
+
+    // Constructor - รับ context มาจาก DI
+    public IndexModel(RazorPagesMovieContext context)
+    {
+        _context = context;
+    }
+
+    public async Task OnGetAsync()
+    {
+        // ใช้ context ดึงข้อมูลจากฐานข้อมูล
+        var movies = await _context.Movie.ToListAsync();
+    }
+}
+```
+
+**ข้อดี:**
+- ไม่ต้องสร้าง object เอง
+- ทดสอบง่ายขึ้น
+- Code แยกส่วนชัดเจน
+
+---
+
+## 🧪 ทดสอบแอป
+
+### เปิดเบราว์เซอร์และเข้า:
+```
+http://localhost:port/Movies
+```
+
+### ทดสอบฟีเจอร์:
+✅ **Create New** - สร้างหนังใหม่  
+✅ **Details** - ดูรายละเอียด  
+✅ **Edit** - แก้ไขข้อมูล  
+✅ **Delete** - ลบข้อมูล  
+
+---
+
+## 📊 สรุป Part 2
+
+### สิ่งที่เราได้เรียนรู้:
+
+1. **Model Class** - ออกแบบโครงสร้างข้อมูล (Movie)
+2. **EF Core** - ORM ที่ทำให้ทำงานกับฐานข้อมูลง่ายขึ้น
+3. **DbContext** - ตัวจัดการฐานข้อมูล
+4. **Scaffolding** - สร้างหน้า CRUD อัตโนมัติ
+5. **Migration** - สร้างและอัพเดทฐานข้อมูล
+6. **Dependency Injection** - ส่ง object อัตโนมัติ
+
+### Flow การทำงาน:
+```
+Model → DbContext → Program.cs (DI) → Migration → Database → CRUD Pages
+
+
+------------------------
+
+
+
+part3 :Part 3, scaffolded Razor Pages in ASP.NET Core
+
+
+Razor Pages Part 3 - ทำความเข้าใจ Scaffolded Pages
+ใน Part 3 นี้เราจะมาเจาะลึกเกี่ยวกับ Razor Pages ที่ถูกสร้างอัตโนมัติ จาก Scaffolding ในบทที่แล้วครับ! 🔍
+
+Part 3 เรียนรู้อะไรบ้าง?
+
+วิธีการทำงานของ Index Page (หน้าแสดงรายการ)
+โครงสร้างของ Create Page (หน้าสร้างข้อมูล)
+Razor Syntax และการใช้งาน
+Tag Helpers คืออะไร
+Layout และ ViewData
+
+
+📄 ส่วนที่ 1: Index Page Model (Pages/Movies/Index.cshtml.cs)
+Code ของ IndexModel
+csharpusing Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
+using RazorPagesMovie.Models;
+
+namespace RazorPagesMovie.Pages.Movies;
+
+public class IndexModel : PageModel
+{
+    private readonly RazorPagesMovie.Data.RazorPagesMovieContext _context;
+
+    // Constructor - รับ context ผ่าน Dependency Injection
+    public IndexModel(RazorPagesMovie.Data.RazorPagesMovieContext context)
+    {
+        _context = context;
+    }
+
+    // Property สำหรับเก็บรายการหนัง
+    public IList<Movie> Movie { get; set; } = default!;
+
+    // Method ที่ทำงานเมื่อมี GET request
+    public async Task OnGetAsync()
+    {
+        if (_context.Movie != null)
+        {
+            Movie = await _context.Movie.ToListAsync();
+        }
+    }
+}
+🔍 อธิบายแต่ละส่วน
+ส่วนของ Codeความหมายpublic class IndexModel : PageModelสืบทอดจาก PageModel (ตามแบบแผน Razor Pages)private readonly ... _contextตัวแปรสำหรับเชื่อมต่อฐานข้อมูล (ใช้ readonly = ห้ามเปลี่ยนค่า)Constructorรับ context ผ่าน Dependency Injectionpublic IList<Movie> MovieProperty เก็บรายการหนังทั้งหมด (ส่งไปให้ View)OnGetAsync()Method ที่ทำงานเมื่อมี GET request (เปิดหน้าเว็บ)await _context.Movie.ToListAsync()ดึงข้อมูลหนังทั้งหมดจากฐานข้อมูลแบบ Async
+
+🌐 ส่วนที่ 2: Index Razor Page (Pages/Movies/Index.cshtml)
+Code ของ Index.cshtml
+cshtml@page
+@model RazorPagesMovie.Pages.Movies.IndexModel
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-page="Create">Create New</a>
+</p>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>@Html.DisplayNameFor(model => model.Movie[0].Title)</th>
+            <th>@Html.DisplayNameFor(model => model.Movie[0].ReleaseDate)</th>
+            <th>@Html.DisplayNameFor(model => model.Movie[0].Genre)</th>
+            <th>@Html.DisplayNameFor(model => model.Movie[0].Price)</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model.Movie) {
+        <tr>
+            <td>@Html.DisplayFor(modelItem => item.Title)</td>
+            <td>@Html.DisplayFor(modelItem => item.ReleaseDate)</td>
+            <td>@Html.DisplayFor(modelItem => item.Genre)</td>
+            <td>@Html.DisplayFor(modelItem => item.Price)</td>
+            <td>
+                <a asp-page="./Edit" asp-route-id="@item.Id">Edit</a> |
+                <a asp-page="./Details" asp-route-id="@item.Id">Details</a> |
+                <a asp-page="./Delete" asp-route-id="@item.Id">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
+🔍 อธิบาย Razor Directives
+1. @page Directive
+cshtml@page
+
+ต้องมีเป็นบรรทัดแรกเสมอ!
+บอกว่าไฟล์นี้คือ MVC Action (สามารถรับ HTTP request ได้)
+
+2. @model Directive
+cshtml@model RazorPagesMovie.Pages.Movies.IndexModel
+
+กำหนดว่าหน้านี้ใช้ IndexModel เป็น PageModel
+ทำให้เราเข้าถึง properties และ methods ใน Model ได้
+
+3. Razor Code Block
+cshtml@{
+    ViewData["Title"] = "Index";
+}
+
+เครื่องหมาย @{ ... } = C# Code Block
+ตั้งค่า Title ของหน้าเว็บ (แสดงใน browser tab)
+
+
+🎨 HTML Helpers
+1. DisplayNameFor - แสดงชื่อ Property
+cshtml@Html.DisplayNameFor(model => model.Movie[0].Title)
+
+แสดงชื่อของ property (เช่น "Title")
+ใช้ Lambda Expression model => model.Movie[0].Title
+ไม่ evaluate ค่า แค่เช็คว่า property ชื่ออะไร
+
+2. DisplayFor - แสดงค่าของ Property
+cshtml@Html.DisplayFor(modelItem => item.Title)
+
+แสดงค่าจริงของข้อมูล (เช่น "Avatar")
+Evaluate ค่าและแสดงผล
+
+
+🏷️ Tag Helpers
+Tag Helper คือ attribute พิเศษที่ทำให้ HTML มี functionality มากขึ้น
+1. Anchor Tag Helper
+cshtml<a asp-page="Create">Create New</a>
+
+asp-page="Create" → สร้าง link ไปหน้า Create
+ไม่ต้องเขียน URL เต็มๆ
+
+2. Anchor Tag Helper พร้อม Route Data
+cshtml<a asp-page="./Edit" asp-route-id="@item.Id">Edit</a>
+
+asp-page="./Edit" → ไปหน้า Edit
+asp-route-id="@item.Id" → ส่ง ID ไปด้วย (เช่น /Edit?id=5)
+
+
+📝 ส่วนที่ 3: Create Page Model (Pages/Movies/Create.cshtml.cs)
+Code ของ CreateModel
+csharpusing Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using RazorPagesMovie.Models;
+
+namespace RazorPagesMovie.Pages.Movies
+{
+    public class CreateModel : PageModel
+    {
+        private readonly RazorPagesMovie.Data.RazorPagesMovieContext _context;
+
+        public CreateModel(RazorPagesMovie.Data.RazorPagesMovieContext context)
+        {
+            _context = context;
+        }
+
+        // แสดงหน้า Create Form
+        public IActionResult OnGet()
+        {
+            return Page();
+        }
+
+        // Property สำหรับรับค่าจาก Form
+        [BindProperty]
+        public Movie Movie { get; set; } = default!;
+
+        // Method ที่ทำงานเมื่อ Submit Form
+        public async Task<IActionResult> OnPostAsync()
+        {
+            // เช็คว่าข้อมูลถูกต้องหรือไม่
+            if (!ModelState.IsValid || _context.Movie == null || Movie == null)
+            {
+                return Page(); // แสดง Form อีกครั้ง
+            }
+
+            // บันทึกข้อมูลลงฐานข้อมูล
+            _context.Movie.Add(Movie);
+            await _context.SaveChangesAsync();
+
+            // Redirect ไปหน้า Index
+            return RedirectToPage("./Index");
+        }
+    }
+}
+🔍 อธิบายส่วนสำคัญ
+1. OnGet() Method
+csharppublic IActionResult OnGet()
+{
+    return Page();
+}
+
+เรียกเมื่อเปิดหน้า Create (GET request)
+return Page() = แสดงหน้า Create Form
+
+2. [BindProperty] Attribute
+csharp[BindProperty]
+public Movie Movie { get; set; }
+
+Model Binding - ผูกข้อมูลจาก Form กับ Property นี้อัตโนมัติ
+เมื่อกด Submit, ข้อมูลจาก Form จะถูกใส่เข้า Movie property
+
+3. OnPostAsync() Method
+csharppublic async Task<IActionResult> OnPostAsync()
+{
+    if (!ModelState.IsValid)
+    {
+        return Page(); // มี error → แสดง Form อีกครั้ง
+    }
+    
+    _context.Movie.Add(Movie); // เพิ่มหนังใหม่
+    await _context.SaveChangesAsync(); // บันทึกลง Database
+    
+    return RedirectToPage("./Index"); // ไปหน้า Index
+}
+Flow การทำงาน:
+
+เช็ค ModelState.IsValid (ข้อมูลถูกต้องไหม?)
+ถ้าไม่ถูกต้อง → return Page() (แสดง Form พร้อม error messages)
+ถ้าถูกต้อง → บันทึกข้อมูล → Redirect ไปหน้า Index
+
+
+🎯 ส่วนที่ 4: Create Razor Page (Pages/Movies/Create.cshtml)
+Code ของ Create.cshtml
+cshtml@page
+@model RazorPagesMovie.Pages.Movies.CreateModel
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<h1>Create</h1>
+<h4>Movie</h4>
+<hr />
+
+<div class="row">
+    <div class="col-md-4">
+        <form method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            
+            <div class="form-group">
+                <label asp-for="Movie.Title" class="control-label"></label>
+                <input asp-for="Movie.Title" class="form-control" />
+                <span asp-validation-for="Movie.Title" class="text-danger"></span>
+            </div>
+            
+            <div class="form-group">
+                <label asp-for="Movie.ReleaseDate" class="control-label"></label>
+                <input asp-for="Movie.ReleaseDate" class="form-control" />
+                <span asp-validation-for="Movie.ReleaseDate" class="text-danger"></span>
+            </div>
+            
+            <div class="form-group">
+                <label asp-for="Movie.Genre" class="control-label"></label>
+                <input asp-for="Movie.Genre" class="form-control" />
+                <span asp-validation-for="Movie.Genre" class="text-danger"></span>
+            </div>
+            
+            <div class="form-group">
+                <label asp-for="Movie.Price" class="control-label"></label>
+                <input asp-for="Movie.Price" class="form-control" />
+                <span asp-validation-for="Movie.Price" class="text-danger"></span>
+            </div>
+            
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-page="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
+🔍 อธิบาย Tag Helpers ใน Form
+1. Form Tag Helper
+cshtml<form method="post">
+
+สร้าง HTML form
+รวม Antiforgery Token (ป้องกัน CSRF attacks) อัตโนมัติ
+
+2. Validation Summary Tag Helper
+cshtml<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+แสดง error messages ทั้งหมด (ถ้ามี)
+ModelOnly = แสดงเฉพาะ model-level errors
+
+3. Label Tag Helper
+cshtml<label asp-for="Movie.Title" class="control-label"></label>
+
+สร้าง <label> พร้อม attribute for="Movie_Title"
+แสดงชื่อ property (เช่น "Title")
+
+4. Input Tag Helper
+cshtml<input asp-for="Movie.Title" class="form-control" />
+
+สร้าง <input> ที่ผูกกับ Movie.Title
+สร้าง HTML attributes สำหรับ jQuery Validation
+กำหนด type ตาม property type (เช่น type="text", type="date")
+
+5. Validation Tag Helper
+cshtml<span asp-validation-for="Movie.Title" class="text-danger"></span>
+
+แสดง error message สำหรับ field นั้นๆ (ถ้ามี)
+
+
+📐 ส่วนที่ 5: Layout และ ViewData
+ViewData คืออะไร?
+ViewData เป็น Dictionary สำหรับส่งข้อมูลจาก Page ไปยัง Layout
+cshtml@{
+    ViewData["Title"] = "Index";
+}
+ใช้งานใน _Layout.cshtml
+cshtml<title>@ViewData["Title"] - Movie</title>
+ผลลัพธ์: <title>Index - Movie</title>
+
+🏗️ Layout Page (_Layout.cshtml)
+ไฟล์ Pages/Shared/_Layout.cshtml
+cshtml<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Movie</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" />
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm">
+            <a class="navbar-brand" asp-page="/Movies/Index">RpMovie</a>
+        </nav>
+    </header>
+    
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+    
+    <footer>
+        <div class="container">
+            &copy; 2024 - Movie
+        </div>
+    </footer>
+</body>
+</html>
+```
+
+### **@RenderBody()** คืออะไร?
+
+- **Placeholder** สำหรับเนื้อหาของแต่ละหน้า
+- เมื่อเปิดหน้า Index → เนื้อหาของ Index.cshtml จะถูกแทรกตรงนี้
+
+---
+
+## 📊 สรุป Part 3
+
+### สิ่งที่เรียนรู้:
+
+| หัวข้อ | รายละเอียด |
+|--------|-----------|
+| **PageModel** | Class ที่จัดการ logic (OnGet, OnPost) |
+| **Razor Directives** | `@page`, `@model` |
+| **HTML Helpers** | `DisplayNameFor`, `DisplayFor` |
+| **Tag Helpers** | `asp-page`, `asp-for`, `asp-validation-for` |
+| **Model Binding** | `[BindProperty]` ผูก Form กับ Property |
+| **Layout** | Template ที่ใช้ร่วมกันทุกหน้า |
+| **ViewData** | ส่งข้อมูลไปยัง Layout |
+
+### Flow การทำงาน Create Page:
+```
+1. เปิดหน้า → OnGet() → แสดง Form
+2. กรอกข้อมูล → Submit Form
+3. OnPostAsync() → Validate
+4. ถ้า Valid → บันทึก → RedirectToPage("Index")
+5. ถ้า Invalid → return Page() (แสดง errors)
+
+
+-----------------
+
+
